@@ -1,2 +1,4 @@
 # STA314-19fall
 school work of STA314H1 F (Fall) Statistical Methods for Machine Learning I
+## Course Description
+Statistical methods for supervised and unsupervised learning from data: training error, test error and cross-validation; classification, regression, and logistic regression; principal components analysis; stochastic gradient descent; decision trees and random forests; k-means clustering and nearest neighbour methods. Computational tutorials will support the efficient application of these methods.

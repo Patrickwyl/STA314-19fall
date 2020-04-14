@@ -1,0 +1,178 @@
+---
+title: "STA314 Homework 4"
+author: "Yulin WANG"
+subtitle: 'student number: 1003942326'
+date: "13/11/2019"
+output:
+  pdf_document: default
+---
+
+# Question 1 
+
+## (i)
+$$
+\begin{aligned}
+likelihood \ function:\ L(p)&=\prod_{i=1}^{n}p^{y_i}(1-p)^{1-y_i} \\
+log-likelihood \ function:\ l(p)&=\sum_{i=1}^{n}log(p^{y_i}(1-p)^{1-y_i}) \\
+&=\sum_{i=1}^{n}y_{i}\cdot log(p) + \sum_{i=1}^{n}(1-y_{i})\cdot log(1-p) \\
+&=log(p)\cdot\sum_{i=1}^{n}y_{i} + log(1-p)\cdot \sum_{i=1}^{n}(1-y_{i})
+\end{aligned}
+$$
+
+set $\frac{\partial l(p)}{\partial p}=0$, then we get:
+
+$$
+\begin{aligned}
+\frac{1}{p} \cdot \sum_{i=1}^{n}y_{i} - \frac{1}{1-p} \cdot \sum_{i=1}^{n}(1-y_{i}) &=0 \\
+\Rightarrow \ (1-p) \cdot \sum_{i=1}^{n}y_{i} - p \cdot \sum_{i=1}^{n}(1-y_{i}) &=0 \\
+(1-p) \cdot \sum_{i=1}^{n}y_{i} = p \cdot \sum_{i=1}^{n}(1-y_{i}) \\
+\Rightarrow \ \sum_{i=1}^{n}y_{i} = np\ \ \Rightarrow \ \ \hat p = \frac{\sum_{i=1}^{n}y_{i}}{n}
+\end{aligned}
+$$
+
+
+## (ii)
+$$\hat p = \frac{\sum_{i=1}^{n}y_{i}}{n} = \frac{\sum_{i=1}^{5}y_{i}}{5}= \frac{1+1+1+0+0}{5}=\frac{3}{5}$$
+
+
+\newpage
+
+## (iii)
+```{r,message=FALSE, warning=FALSE}
+p <- 1:100/100 #grid search sequence 0.01,0.02,...,0.99,1
+log_likelihood <- 3*log(p) + (5-3)*log(1-p) #3 successes and 2 failures
+plot(p, log_likelihood, type = "l", main = "log_likelihood of p")
+p_hat<-p[which.max(log_likelihood)]  #value of p that maximizes the log-likelihood
+p_hat 
+abline(v = p_hat, col= "red")
+```
+
+
+
+
+
+\newpage
+# Question 2 
+
+## (i)
+
+$$
+\begin{aligned}
+likelihood \ function:\ L(\beta)&=\prod_{i=1}^{n}p_i^{y_i}(1-p_i)^{1-y_i} \\
+log-likelihood \ function:\ l(\beta)&=\sum_{i=1}^{n}log(p_i^{y_i}(1-p_i)^{1-y_i}) \\
+&=\sum_{i=1}^{n} \{ y_{i}\cdot log(p_i) + (1-y_{i})\cdot log(1-p_i) \}\\
+&= \sum_{i=1}^{n} \{ y_{i}\cdot log(\frac{p_i}{1-p_i}) + log(1-p_i) \}\\
+&= \sum_{i=1}^{n} \{ y_{i}\cdot (\beta_0 + \beta_1 x_i) + 
+log(1-\frac{e^{\beta_0 + \beta_1 x_i}}{1+e^{\beta_0 + \beta_1 x_i}}) \}\\
+&= \sum_{i=1}^{n} \{ y_{i}\cdot (\beta_0 + \beta_1 x_i) + 
+log(\frac{1}{1+e^{\beta_0 + \beta_1 x_i}}) \}\\
+&= \sum_{i=1}^{n} \{ y_{i}\cdot (\beta_0 + \beta_1 x_i) -
+log(1+e^{\beta_0 + \beta_1 x_i}) \}
+\end{aligned}
+$$
+
+## (ii)
+
+```{r,message=FALSE, warning=FALSE}
+# function ll to calculate the log-likelihood
+ll <- function(beta, x, y){
+  beta0 <- beta[1]
+  beta1 <- beta[2]
+  return (sum(y*(beta0 + beta1*x))-sum(log(1+exp(beta0 + beta1*x))))
+}
+```
+
+
+## (iii)
+
+```{r,message=FALSE, warning=FALSE}
+library(ISLR)
+data(Default)
+model1 <- glm(default ~ balance, family = "binomial", data = Default)
+summary(model1)
+```
+
+
+## (iv)
+
+```{r,message=FALSE, warning=FALSE}
+default <- ifelse(Default$default == "Yes", 1, 0) #set "Yes"=1, "No"=0
+coefs <- optim(c(0, 0), ll, x = Default$balance, y = default, 
+             control = list(fnscale = -1), hessian = TRUE)
+coefs$par
+```
+
+
+## (v)
+The maximum likelihood estimates are almost same obtained using optim() in part(iv) and using glm() in part(iii).
+
+## (vi)
+```{r,message=FALSE, warning=FALSE}
+sqrt(diag(solve(coefs$hessian)))
+```
+
+
+## (vii)
+
+The standard error estimates are different obtained using hessian in part(vi) and using glm() in part (iii).
+
+
+
+\newpage
+# Question 3
+
+## (i)
+```{r,message=FALSE, warning=FALSE}
+set.seed(100)
+model2 <- glm(default ~ income + balance, family = "binomial", data = Default)
+summary(model2)
+```
+
+
+## (ii)
+
+```{r,message=FALSE, warning=FALSE}
+#function boot.fn
+boot.fn <- function(data, index){
+  return (coef(glm(default ~ income + balance, family = "binomial", data = data, subset = index)))
+}
+boot.fn(Default, 1:nrow(Default))
+```
+
+
+\newpage
+## (iii)
+
+```{r,message=FALSE, warning=FALSE}
+library(boot)
+boot(Default, boot.fn, R=100)
+```
+
+
+
+## (iv)
+Standard error estimates for income and balance are pretty close using glm summary function and bootstrap with R=100.
+
+* income: 4.985e-06 using glm summary, 4.530553e-06 using bootstrap
+* balance: 2.274e-04 using glm summary, 2.398827e-04 using bootstrap
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

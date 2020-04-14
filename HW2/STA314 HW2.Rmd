@@ -1,0 +1,92 @@
+---
+title: "STA314 Homework 2"
+author: "Yulin WANG"
+subtitle: "student number: 1003942326"
+date: "11/10/2019 due"
+output: pdf_document
+---
+
+# Question 1
+
+## (a)
+fit the model first: let $Y$ be the response, starting salary after graduation(in thousands of dollars)
+$$\hat Y = 50+20*GPA+0.07*IQ+35*Gender+0.01*GPA:IQ-10*GPA:Gender$$
+model for male(Gender=0):
+$$\hat Y_M = 50+20*GPA+0.07*IQ+0.01*GPA:IQ$$
+model for female(Gender=1):
+$$\hat Y_F = 50+20*GPA+0.07*IQ+0.01*GPA:IQ-10*GPA+35$$
+Since we have:
+$$\hat Y_M-\hat Y_F=10*GPA-35>0 \Rightarrow GPA>3.5 $$
+So, for a fixed value of IQ and GPA, given the GPA above 3.5, males will earn more on average than females. \
+Thus, iii is correct.
+
+## (b)
+Since we have:
+$$\hat Y_F = 50+20*4.0+0.07*110+0.01*4.0*110-10*4.0+35=137.1$$
+So, the predicted salary of this female is 137.1 thousand dollars.
+
+## (c)
+False. \
+
+* The scale of IQ is much larger than other predictors (about 100 versus 0-4 for GPA and 0-1 for Gender), so even if all predictors have the same impact on salary, coefficients will be smaller for IQ predictors. \
+* We need to compute the p-value for the estimate of coefficient to determine if a predictor is statistically significant or not. However, we do not have enough information(standard error of $\hat \beta_4$) here. 
+
+
+
+\newpage
+# Question 2
+
+## (a)
+```{r}
+library('ISLR')
+data(Carseats)
+model1 <- lm(Sales ~ Price + Urban + US, data=Carseats)
+summary(model1)
+```
+
+## (b)
+* Price: \
+$\hat\beta_1=-0.054459$; p-value$< 2e-16$; statistically significant\
+interpretation: For each dollar increase in Price, Sales will decrease by about 54 on average.\
+
+* UrbanYes:\
+$\hat\beta_2=-0.021916$; p-value$=0.936$; not statistically significant\
+interpretation: Sales are about 22 lower on average for Urban locations.\
+But since the p-value$=0.936$, then there is no evidence to reject $H_0:\beta_2=0$, so there is no relationship between Sales and whether the location is Urban or not.\
+
+* USYes:\
+$\hat\beta_3=1.200573$; p-value$=4.86e-06$; statistically significant\
+interpretation: Sales are about 1,201 higher on average in the US locations.
+
+
+## (c)
+$$\hat{Sales} = 13.043 - 0.054 * Price - 0.022 * UrbanYes + 1.201 * USYes$$
+
+
+\newpage
+
+## (d)
+We can reject the null hypothesis for Price and USYes: $H_0:\beta_1=0$ and $H_0:\beta_3=0$ respectively, since their coefficients have very small p-values(much smaller than 0.05).
+
+
+## (e)
+```{r}
+model2 <- lm(Sales ~ Price + US, data=Carseats)
+summary(model2)
+```
+
+## (f)
+For model1: $R^2=0.2393$ and $RSE=2.472$\
+For model2: $R^2=0.2393$ and $RSE=2.469$\
+Since these two models have the same $R^2$ value, but model2 has a smaller RSE value than model1, so we can conclude that model2 which without the variable UrbanYes fits the data better.
+
+
+
+
+
+
+
+
+
+
+
